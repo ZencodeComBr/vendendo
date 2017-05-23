@@ -28,7 +28,7 @@ import hashlib
 import locale
 import pytz
 import json
-locale.setlocale(locale.LC_ALL, 'pt_BR')
+locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
 
 
 class Sendx(object):
