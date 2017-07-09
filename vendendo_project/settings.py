@@ -152,6 +152,12 @@ AUTHENTICATION_BACKENDS = (
 
 LANGUAGE_CODE = 'pt-BR'
 
+# Locale for linux environment
+# LOCALE_CODE = 'pt_BR.utf8'
+
+# Locale for MAC OS environment
+LOCALE_CODE = 'pt_BR.UTF-8'
+
 TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
