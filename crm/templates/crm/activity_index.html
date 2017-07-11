@@ -41,10 +41,15 @@
               <td><a href="{% url 'crm:activity-update' my_activity.id %}">{{ my_activity.title }}</a></td>
               <td><a href="{% url 'crm:activity-update' my_activity.id %}">{{ my_activity.opportunity }}</a></td>
               <td>
-                {% if my_activity.is_late %}
-                  <span class="label label-danger">Atrasada</span>
-                  {% else %}
-                  <span class="label label-success">Pendente</span>
+                {% if my_activity.completed %}
+                    <span class="label label-success">Concluída</span>
+                {% else %}
+                    {% if my_activity.is_late %}
+                        <span class="label label-danger">Atrasada</span>
+
+                    {% else %}
+                        <span class="label label-default">Pendente</span>
+                    {% endif %}
                 {% endif %}
               </td>
               <td>{{ my_activity.deadline|date:"d/m/Y H:i" }}</td>
