@@ -206,7 +206,7 @@ class OpportunityForm(forms.ModelForm):
         self.fields['stage'].required = True
         self.fields['stage'].label = 'Etapa'
         self.fields['stage'].widget.attrs.update({'class': 'form-control'})
-        self.fields['stage'].queryset = SaleStage.objects.filter(organization=organization)
+        self.fields['stage'].queryset = SaleStage.objects.filter(organization=organization).order_by('order_number')
         # field seller
         self.fields['seller'].required = False
         self.fields['seller'].label = 'Vendedor'
