@@ -5,9 +5,22 @@ from crm.models import Organization, UserOrganization, Customer
 
 
 class UserComplement(models.Model):
-    user_account = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    organization_active = models.ForeignKey('crm.Organization', on_delete=models.CASCADE, null=True)
-    customers = models.ManyToManyField('crm.Customer')
+    user_account = models.ForeignKey(
+        'auth.User',
+        on_delete=models.CASCADE
+    )
+    
+    organization_active = models.ForeignKey(
+        'crm.Organization',
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    customers = models.ManyToManyField(
+        'crm.Customer',
+        related_name='customers_of_user'
+    )
+
     avatar = models.CharField(max_length=255, null=True)
 
     def __unicode__(self):
