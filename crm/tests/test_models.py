@@ -30,6 +30,7 @@ class UserOrganizationTests(TestCase):
                                  username= 'user_test',
                                  email='a@ab.com',
                                  first_name='John',
+                                 last_name='Doe',
                                  password='A23456@8',
                                  type_user='A',
                                  status_active='A',
@@ -37,7 +38,8 @@ class UserOrganizationTests(TestCase):
         user_test = User.objects.create_user(username=username,
                                              email=email,
                                              password=password,
-                                             first_name=first_name)
+                                             first_name=first_name,
+                                             last_name=last_name)
         organization_test = Organization.objects.create(
             name=organization_name)
 
@@ -54,11 +56,11 @@ class UserOrganizationTests(TestCase):
         self.assertTrue(isinstance(self.user_organization, UserOrganization))
 
     def test_unicode_label(self):
-        self.assertIn('John (organization_test)', str(self.user_organization))
+        self.assertIn('John Doe', str(self.user_organization))
 
     def test_should_have_an_absolute_url_to_index(self):
         url = self.user_organization.get_absolute_url()
-        self.assertEquals('/sellers/', str(url))
+        self.assertEquals('/members/', str(url))
 
 
 class CustomerServiceTests(TestCase):

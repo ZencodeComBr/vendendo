@@ -169,16 +169,8 @@ class UserLogin(base.View):
         username = hashlib.md5(email).hexdigest()[-30:]
         user_account = authenticate(username=username, password=password)
         if user_account is not None:
-            if user_account.is_active:
-                login(request, user_account)
-                return HttpResponseRedirect("/dashboard/")
-            else:
-                return TemplateResponse(request,
-                                        self.template_name,
-                                        {'title': self.title,
-                                         'error': "Este usuário encontra-se, \
-                                          inativo. Entre em contato com o \
-                                          administrador da conta."})
+            login(request, user_account)
+            return HttpResponseRedirect("/dashboard/")
         else:
             return TemplateResponse(request,
                                     self.template_name,
@@ -220,7 +212,7 @@ class ResetPassword(base.View):
                 except Exception, e:
                     return TemplateResponse(request,
                                             self.template_name,
-                                            {'error': "Erro interno: "})
+                                            {'error': "Erro interno: %s" % e.message})
             else:
                 return TemplateResponse(request,
                                         self.template_name,

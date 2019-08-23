@@ -5,6 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.auth.models import User
 from crm.models import Organization, UserOrganization, CustomerService
+from userapp.models import UserComplement
 from django.conf import settings
 from importlib import import_module
 from crm.views import *
@@ -125,7 +126,7 @@ class OrganizationTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
-class SellerTests(TestCase):
+class MemberTests(TestCase):
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -134,51 +135,51 @@ class SellerTests(TestCase):
         self.data = {"first_name":"John",
                      "last_name":"Doe"}
 
-    def test_create_a_new_seller_form_valid(self):
-        request = self.factory.post("/seller/add/", self.data)
+    def test_create_a_new_member_form_valid(self):
+        request = self.factory.post("/member/add/", self.data)
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session["email_find"] = "johndoe@a.com"
         request.session.save()
-        response = SellerCreate.as_view()(request)
+        response = MemberCreate.as_view()(request)
         self.assertEqual(response.status_code, 302)
 
     @mock.patch('crm.views.Sendx.send_invite')
-    def test_create_a_new_seller_raises_exception(self, mock_mail):
+    def test_create_a_new_member_raises_exception(self, mock_mail):
         mock_mail.side_effect = Exception('Fail')
-        request = self.factory.post("/seller/add/", self.data)
+        request = self.factory.post("/member/add/", self.data)
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session["email_find"] = "johndoe@a.com"
         request.session.save()
         with self.assertRaises(Exception):
-            response = SellerCreate.as_view()(request)
+            response = MemberCreate.as_view()(request)
 
-    def test_join_a_new_seller_form_valid(self):
-        request = self.factory.post("/seller/add/", self.data)
+    def test_join_a_new_member_form_valid(self):
+        request = self.factory.post("/member/add/", self.data)
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session["email_find"] = "johndoe@a.com"
         request.session.save()
-        response = SellerCreate.as_view()(request)
+        response = MemberCreate.as_view()(request)
 
-        request = self.factory.post("/seller/join/", self.data)
+        request = self.factory.post("/member/join/", self.data)
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session["email_find"] = "johndoe@a.com"
         request.session.save()
-        response = SellerJoin.as_view()(request)
+        response = MemberJoin.as_view()(request)
         self.assertEqual(response.status_code, 302)
 
-    def test_seller_deactivate_should_update_status(self):
-        request = self.factory.post("/seller/add/", self.data)
+    def test_member_deactivate_should_update_status(self):
+        request = self.factory.post("/member/add/", self.data)
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session["email_find"] = "johndoe@a.com"
         request.session.save()
-        response = SellerCreate.as_view()(request)
+        response = MemberCreate.as_view()(request)
         #run the test
-        request = self.factory.post(reverse('crm:seller-deactivate',kwargs={'pk': 1}))
+        request = self.factory.post(reverse('crm:member-deactivate',kwargs={'pk': 1}))
         request.user = self.user_session
 
         request = add_middleware_to_request(request, SessionMiddleware)
@@ -186,20 +187,20 @@ class SellerTests(TestCase):
 
         user_account = User.objects.get(email="johndoe@a.com")
         seller = UserOrganization.objects.get(user_account=user_account)
-        response = setup_view(SellerDeactivate(), request)
+        response = setup_view(MemberDeactivate(), request)
         response.kwargs = {'pk': seller.id}
         response = response.post(request)
-        seller_deactivate = UserOrganization.objects.get(user_account=user_account)
+        member_deactivate = UserOrganization.objects.get(user_account=user_account)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(seller_deactivate.status_active, "I")
+        self.assertEqual(member_deactivate.status_active, "I")
 
     def test_invite_active_only_valid_code(self):
-        request = self.factory.post("/seller/add/", self.data)
+        request = self.factory.post("/member/add/", self.data)
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session["email_find"] = "johndoe@a.com"
         request.session.save()
-        response = SellerCreate.as_view()(request)
+        response = MemberCreate.as_view()(request)
 
         user_account = User.objects.get(email="johndoe@a.com")
         user_organization = UserOrganization.objects.get(user_account=user_account)
@@ -209,7 +210,7 @@ class SellerTests(TestCase):
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session.save()
-        response = SellerInviteActivate.as_view()(request)
+        response = MemberInviteActivate.as_view()(request)
 
         user_account = User.objects.get(email="johndoe@a.com")
         user_organization = UserOrganization.objects.get(user_account=user_account)
@@ -219,23 +220,23 @@ class SellerTests(TestCase):
     @mock.patch('crm.views.Sendx.send_invite')
     def test_seller_send_invite(self, mock_mail):
         mock_mail.side_effect = "OK"
-        request = self.factory.post("/seller/add/", self.data)
+        request = self.factory.post("/member/add/", self.data)
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session["email_find"] = "johndoe@a.com"
         request.session.save()
-        response = SellerCreate.as_view()(request)
+        response = MemberCreate.as_view()(request)
         # run test
-        request = self.factory.post(reverse('crm:seller-invite',kwargs={'pk': 1}))
+        request = self.factory.post(reverse('crm:member-invite',kwargs={'pk': 1}))
         request.user = self.user_session
 
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session.save()
 
         user_account = User.objects.get(email="johndoe@a.com")
-        seller = UserOrganization.objects.get(user_account=user_account)
-        response = setup_view(SellerInvite(), request)
-        response.kwargs = {'pk': seller.id}
+        member = UserOrganization.objects.get(user_account=user_account)
+        response = setup_view(MemberInvite(), request)
+        response.kwargs = {'pk': member.id}
         response = response.post(request)
         self.assertEqual(response.status_code, 302)
 
@@ -269,8 +270,11 @@ class CustomerServiceTests(TestCase):
         self.factory = RequestFactory()
         user_organization = create_user_organization()
         self.user_session = user_organization.user_account
-        self.data = {"name":"service_test",
-                     "definition":"P"}
+        self.data = {
+            "name":"service_test",
+            "definition":"P",
+            "status":"A"
+        }
 
     def create_customerservice(user_test=None, organization_test=None, customerservice_test=None):
         if not user_test:
@@ -306,10 +310,12 @@ class CustomerServiceTests(TestCase):
         response = CustomerServiceIndex.as_view()(request)
         self.assertContains(response, "Produtos e Serviços")
 
-    def test_create_a_new_customerservice_form_valid(self):
+    def test_should_create_a_new_customerservice(self):
         request = self.factory.post("/customerservice/add/", self.data)
         request.user = self.user_session
         request = add_middleware_to_request(request, SessionMiddleware)
         request.session.save()
         response = CustomerServiceCreate.as_view()(request)
-        self.assertEqual(response.status_code, 302)
+        customer_services = CustomerService.objects.all()
+        self.assertEqual( 1, len(customer_services))
+        self.assertEqual( 'service_test', customer_services[0].name)

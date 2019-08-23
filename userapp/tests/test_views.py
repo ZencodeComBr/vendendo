@@ -1,11 +1,15 @@
 # coding:utf-8
 from django.core import mail
 from django.test import TestCase, RequestFactory
+from django.urls import reverse
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.auth.models import User
 from userapp.views import ListUsers, RegisterUser, EditUser, UserLogin, ResetPassword, EditPassword, Logout
 import mock
+from userapp.models import UserComplement
+import uuid
+import hashlib
 
 
 def add_middleware_to_request(request, middleware_class):
@@ -65,7 +69,7 @@ class LoginTests(TestCase):
         request.session.save()
 
         response = RegisterUser.as_view()(request)
-        self.assertContains(response, "Cadastro de Usuário")
+        self.assertContains(response, "Cadastre-se grátis")
 
     def test_register_user_form_valid(self):
         request = self.factory.post("/newuser/", self.data)
@@ -160,22 +164,22 @@ class LoginTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_logon_of_a_inactive_credencial(self):
-        self.create_user()
-        user_created = User.objects.get(email="a@ab.com")
+        u = User.objects.create(
+            username=hashlib.md5('a@ac.com').hexdigest()[-30:],
+            first_name='John',
+            email='a@ac.com',
+            password='A23456@8'
+        )
+        uc = UserComplement()
+        uc.user_account = u
+        uc.save()
+        user_created = User.objects.get(email="a@ac.com")
         user_created.is_active = False
         user_created.save()
-        logon_data = {"email": "a@ab.com", "password": "A23456@8"}
-        request = self.factory.post("/", logon_data)
-        request.user = AnonymousUser()
-
-        request = add_middleware_to_request(request, SessionMiddleware)
-        request.session.save()
-
-        response = UserLogin.as_view()(request)
-        context = response.context_data
-        self.assertEqual(context['error'], "Este usuário encontra-se, \
-                                          inativo. Entre em contato com o \
-                                          administrador da conta.")
+        url = reverse('login')
+        response = self.client.post(url, {"email": "a@ac.com", "password": "A23456@8"})
+        context = response.context
+        self.assertEqual(context['error'], "E-mail ou senha incorretos.")
 
     def test_logon_of_a_incorrect_credencial(self):
         self.create_user()
@@ -192,7 +196,8 @@ class LoginTests(TestCase):
         context = response.context_data
         self.assertEqual(context['error'], "E-mail ou senha incorretos.")
 
-    def test_resetpassword_creates_and_send_a_new_password(self):
+    @mock.patch('userapp.views.send_mail')
+    def test_resetpassword_creates_and_send_a_new_password(self, mock_mail):
         self.create_user()
         data = {"email": "a@ab.com"}
         request = self.factory.post("/resetpwd/", data)
