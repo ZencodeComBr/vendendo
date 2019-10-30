@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'userapp',
     'crm',
-    'landing',
     'coverage',
     'django_nose',
     'social_django',
@@ -124,7 +123,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/dashboard/'
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/error/'
-SOCIAL_AUTH_LOGIN_URL = '/'
+SOCIAL_AUTH_LOGIN_URL = '/login/'
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
@@ -187,7 +186,7 @@ EMAIL_HOST_PASSWORD = 'your_password'
 
 # url to redirect after successfull login
 LOGIN_REDIRECT_URL = '/dashboard/'
-LOGIN_URL ='/'
+LOGIN_URL ='/login/'
 
 # Host for redirect activate invite
 INVITE_HOST = 'http://127.0.0.1:8000'
