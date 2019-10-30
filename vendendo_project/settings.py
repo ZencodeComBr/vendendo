@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'userapp',
     'crm',
-    'landpage',
+    'landing',
     'coverage',
     'django_nose',
     'social_django',
