@@ -20,6 +20,6 @@ urlpatterns = [
     url(r'^', include('userapp.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^', include('crm.urls')),
-    url(r'^', include('landpage.urls')),
+    url(r'^', include('landing.urls')),
     url('', include('social_django.urls', namespace='social')),
 ]
